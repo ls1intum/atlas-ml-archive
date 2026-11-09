@@ -1,0 +1,192 @@
+diff --git a/.github/CODEOWNERS b/.github/CODEOWNERS
+index 0c8365e39..d3af2956f 100644
+--- a/.github/CODEOWNERS
++++ b/.github/CODEOWNERS
+@@ -1,5 +1,4 @@
+ /.github/CODEOWNERS @bassner
+-* @ls1intum/iris-maintainers @ls1intum/athena-maintainers @ls1intum/atlas-maintainers
++* @ls1intum/iris-maintainers @ls1intum/athena-maintainers
+ /iris/ @ls1intum/iris-maintainers
+ /athena/ @ls1intum/athena-maintainers
+-/atlas/ @ls1intum/atlas-maintainers
+diff --git a/.github/ISSUE_TEMPLATE/bug-report.yml b/.github/ISSUE_TEMPLATE/bug-report.yml
+index 9a819da89..2f5209bce 100644
+--- a/.github/ISSUE_TEMPLATE/bug-report.yml
++++ b/.github/ISSUE_TEMPLATE/bug-report.yml
+@@ -44,7 +44,6 @@ body:
+       multiple: true
+       options:
+         - Athena
+-        - Atlas
+         - Iris
+         - Other/Unsure
+     validations:
+diff --git a/.github/PULL_REQUEST_TEMPLATE.md b/.github/PULL_REQUEST_TEMPLATE.md
+index ed3308eaf..94a63adb0 100644
+--- a/.github/PULL_REQUEST_TEMPLATE.md
++++ b/.github/PULL_REQUEST_TEMPLATE.md
+@@ -1,4 +1,3 @@
+ Please go to the `Preview` tab and select the appropriate sub-template:
+ 
+ * [Athena](?expand=1&template=athena.md)
+-* [Atlas](?expand=1&template=atlas.md)
+\ No newline at end of file
+diff --git a/.github/dependabot.yml b/.github/dependabot.yml
+index 0bc7e6155..7e56661b1 100644
+--- a/.github/dependabot.yml
++++ b/.github/dependabot.yml
+@@ -34,21 +34,11 @@ updates:
+         applies-to: version-updates
+         patterns:
+           - "*"
+-  - package-ecosystem: "pip"
+-    directory: "atlas/AtlasMl"
+-    schedule:
+-      interval: "weekly"
+-    groups:
+-      atlas-python-dependencies:
+-        applies-to: version-updates
+-        patterns:
+-          - "*"
+-  # The npm side: three docusaurus sites and the Athena playground. Dependabot raises one pull request per directory.
++  # The npm side: two docusaurus sites and the Athena playground. Dependabot raises one pull request per directory.
+   - package-ecosystem: "npm"
+     directories:
+       - "athena/docs"
+       - "athena/playground"
+-      - "atlas/docs"
+       - "iris/docs"
+     schedule:
+       interval: "weekly"
+diff --git a/.github/issue-labeler.yml b/.github/issue-labeler.yml
+index 692cacd0a..91ba3c2b1 100644
+--- a/.github/issue-labeler.yml
++++ b/.github/issue-labeler.yml
+@@ -1,8 +1,6 @@
+ athena:
+   - athena
+ 
+-atlas:
+-  - atlas
+ 
+ iris:
+   - iris
+\ No newline at end of file
+diff --git a/.github/pullrequest-labeler.yml b/.github/pullrequest-labeler.yml
+index ea6fcb79b..0fbe13cb8 100644
+--- a/.github/pullrequest-labeler.yml
++++ b/.github/pullrequest-labeler.yml
+@@ -6,9 +6,6 @@ athena:
+   - changed-files:
+       - any-glob-to-any-file: athena/**/*
+ 
+-atlas:
+-  - changed-files:
+-      - any-glob-to-any-file: atlas/**/*
+ 
+ iris:
+   - changed-files:
+diff --git a/.github/workflows/add-issue-to-project.yml b/.github/workflows/add-issue-to-project.yml
+index 2d86dbc4a..0e67c8e41 100644
+--- a/.github/workflows/add-issue-to-project.yml
++++ b/.github/workflows/add-issue-to-project.yml
+@@ -27,19 +27,3 @@ jobs:
+         with:
+           project-url: https://github.com/orgs/ls1intum/projects/93
+           github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
+-
+-      # Add issues/PRs labeled with 'atlas' to the Atlas project board
+-      - name: Assign Atlas Project
+-        if: >
+-          (github.event_name == 'issues' &&
+-            ((github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'atlas')) ||
+-             (github.event.action == 'labeled' && github.event.label.name == 'atlas'))
+-          ) ||
+-          (github.event_name == 'pull_request' &&
+-            ((github.event.action == 'opened' && contains(github.event.pull_request.labels.*.name, 'atlas')) ||
+-             (github.event.action == 'labeled' && github.event.label.name == 'atlas'))
+-          )
+-        uses: actions/add-to-project@v1.0.2
+-        with:
+-          project-url: https://github.com/orgs/ls1intum/projects/38
+-          github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
+diff --git a/.github/workflows/docs.yml b/.github/workflows/docs.yml
+index 9e2d91b92..57329ba81 100644
+--- a/.github/workflows/docs.yml
++++ b/.github/workflows/docs.yml
+@@ -14,17 +14,13 @@ jobs:
+     uses: ./.github/workflows/athena_docs-build.yml
+     secrets: inherit
+ 
+-  build-atlas:
+-    uses: ./.github/workflows/atlas_docs-build.yml
+-    secrets: inherit
+-
+   build-iris:
+     uses: ./.github/workflows/iris_docs-build.yml
+     secrets: inherit
+ 
+   deploy:
+     if: github.ref == 'refs/heads/main'
+-    needs: [build-athena, build-atlas, build-iris]
++    needs: [build-athena, build-iris]
+     runs-on: ubuntu-latest
+     environment:
+       name: github-pages
+@@ -36,12 +32,6 @@ jobs:
+           name: athena-docs
+           path: site/athena
+ 
+-      - name: Download Atlas docs
+-        uses: actions/download-artifact@v4
+-        with:
+-          name: atlas-docs
+-          path: site/atlas
+-
+       - name: Download Iris docs
+         uses: actions/download-artifact@v4
+         with:
+@@ -175,12 +165,6 @@ jobs:
+                           <span class="btn">View Documentation →</span>
+                       </a>
+ 
+-                      <a href="/edutelligence/atlas/" class="card">
+-                          <h2>Atlas</h2>
+-                          <p>Competency-based learning management system</p>
+-                          <span class="btn">View Documentation →</span>
+-                      </a>
+-
+                       <a href="/edutelligence/iris/" class="card">
+                           <h2>Iris</h2>
+                           <p>AI-powered virtual tutor for context-aware, scaffolded learning support</p>
+diff --git a/.github/workflows/pullrequest.yml b/.github/workflows/pullrequest.yml
+index 4a601c3f3..3e834eefc 100644
+--- a/.github/workflows/pullrequest.yml
++++ b/.github/workflows/pullrequest.yml
+@@ -21,10 +21,6 @@ jobs:
+     uses: ./.github/workflows/athena_docs-build.yml
+     secrets: inherit
+ 
+-  build-atlas:
+-    uses: ./.github/workflows/atlas_docs-build.yml
+-    secrets: inherit
+-
+   build-iris:
+     uses: ./.github/workflows/iris_docs-build.yml
+     secrets: inherit
+diff --git a/renovate.json b/renovate.json
+index ddf73c6ff..119decbd6 100644
+--- a/renovate.json
++++ b/renovate.json
+@@ -9,11 +9,6 @@
+       "matchFileNames": ["athena/**"],
+       "commitMessagePrefix": "`Athena`:"
+     },
+-    {
+-      "groupName": "atlas",
+-      "matchFileNames": ["atlas/**"],
+-      "commitMessagePrefix": "`Atlas`:"
+-    },
+     {
+       "groupName": "hyperion",
+       "matchFileNames": ["hyperion/**"],
